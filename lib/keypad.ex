@@ -1,24 +1,35 @@
 defmodule Keypad do
-  def track(dir, start_key) when byte_size(dir) == 1 do
-    next_key(dir, start_key)
+  @callback next_key(String.t, String.t) :: String.t
+
+  defmacro __using__(_) do
+    quote location: :keep do
+      @behaviour Keypad
+      @start_key "5"
+
+      import String, only: [codepoints: 1, split: 2, last: 1, to_integer: 1]
+      import Enum, only: [reduce: 3]
+
+      def follow_one(dir, start_key) do
+        next_key(dir, start_key)
+      end
+
+      def follow_row(row, start_key) do
+        row
+        |> codepoints
+        |> reduce(start_key, &follow_one/2)
+      end
+
+      def follow_rows(rows) do
+        rows
+          |> split("\n")
+          |> reduce("", &append_next_key/2)
+      end
+
+      defp append_next_key(row, code) do
+        last_number = last(code) || @start_key
+        next_number = follow_row(row, last_number)
+        code <> next_number
+      end
+    end
   end
-
-  def track(row, start_key) do
-    row
-    |> String.codepoints
-    |> Enum.reduce(start_key, &track/2)
-  end
-
-  # 1 2 3
-  # 4 5 6
-  # 7 8 9
-  defp next_key("U", key) when key in [1, 2, 3], do: key
-  defp next_key("D", key) when key in [7, 8, 9], do: key
-  defp next_key("L", key) when key in [1, 4, 7], do: key
-  defp next_key("R", key) when key in [3, 6, 9], do: key
-
-  defp next_key("U", key), do: key - 3
-  defp next_key("D", key), do: key + 3
-  defp next_key("L", key), do: key - 1
-  defp next_key("R", key), do: key + 1
 end
