@@ -2,11 +2,11 @@ defmodule Keypad do
   @callback next_key(String.t, String.t) :: String.t
 
   defmacro __using__(_) do
-    quote location: :keep do
+    quote do
       @behaviour Keypad
       @start_key "5"
 
-      import String, only: [codepoints: 1, split: 2, last: 1, to_integer: 1]
+      import String, only: [codepoints: 1, split: 2, last: 1, to_integer: 1, to_integer: 2]
       import Enum, only: [reduce: 3]
 
       def follow_one(dir, start_key) do
@@ -29,6 +29,13 @@ defmodule Keypad do
         last_number = last(code) || @start_key
         next_number = follow_row(row, last_number)
         code <> next_number
+      end
+
+      def add(key, num) do
+        Integer.to_string(
+          (to_integer(key, @base) + num),
+          @base
+        )
       end
     end
   end

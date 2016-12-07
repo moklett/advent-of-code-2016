@@ -86,7 +86,12 @@ defmodule Day02 do
 
   Using the same instructions in your puzzle input, what is the correct bathroom
   code?
+
+      iex> Day02.solve2
+      "26B96"
   """
   def solve2 do
+    Input.read("day02")
+      |> Keypad2.follow_rows
   end
 end
